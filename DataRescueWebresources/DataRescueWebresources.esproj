@@ -1,3 +1,7 @@
 <Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.1738743">
-
+  <ItemGroup>
+    <Folder Include="Webresources\Html\" />
+    <Folder Include="Webresources\CSS\" />
+    <Folder Include="Webresources\Script\" />
+  </ItemGroup>
 </Project>
