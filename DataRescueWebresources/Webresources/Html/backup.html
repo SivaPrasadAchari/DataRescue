@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Entity Relationship Viewer</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="ClientGlobalContext.js.aspx" type="text/javascript"></script>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+        }
+
+        select, option {
+            margin-top: 10px;
+            width: 400px;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+        }
+
+        table {
+            margin-top: 20px;
+            width: 400px;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #aaa;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <h3>Relationship Filter</h3>
+
+    <label for="behaviorSelect">Delete Behavior:</label>
+    <select id="behaviorSelect">
+        <option value="">-- Select Behavior --</option>
+        <option value="Referential">Referential</option>
+        <option value="Cascade">Cascade</option>
+        <option value="RemoveLink">RemoveLink</option>
+        <option value="Restrict">Restrict</option>
+    </select>
+
+    <label for="relationshipSelect">Matching Relationships:</label>
+    <select id="relationshipSelect" multiple size="10"></select>
+
+    <table id="resultsTable">
+        <thead>
+            <tr>
+                <th>Referencing Entity</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        let allRelationships = [];
+        const clientUrl = Xrm.Utility.getGlobalContext().getClientUrl();
+
+        async function init() {
+            const formContext = Xrm.Page || Xrm.Utility.getGlobalContext().formContext;
+            const lookup = formContext.getAttribute("deletedobject").getValue();
+
+            if (!lookup || lookup.length === 0) {
+                alert("No entity selected.");
+                return;
+            }
+
+            const entityLogicalName = lookup[0].entityType;
+            const url = `${clientUrl}/api/data/v9.2/EntityDefinitions(LogicalName='${entityLogicalName}')?$expand=OneToManyRelationships`;
+
+            try {
+                const response = await fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "OData-MaxVersion": "4.0",
+                        "OData-Version": "4.0",
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        "Prefer": "odata.include-annotations=*"
+                    }
+                });
+
+                if (!response.ok) throw new Error("Failed to retrieve metadata.");
+
+                const data = await response.json();
+
+                allRelationships = data.OneToManyRelationships.map(rel => ({
+                    schemaName: rel.SchemaName,
+                    referencedEntity: rel.ReferencingEntity,
+                    referencingAttribute: rel.ReferencingAttribute,
+                    deleteBehavior: rel.CascadeConfiguration?.Delete
+                }));
+
+            } catch (error) {
+                console.error("Metadata fetch failed", error);
+                alert("Failed to retrieve metadata.");
+            }
+        }
+
+        function filterRelationshipsByBehavior(behavior) {
+            const filtered = allRelationships.filter(rel => rel.deleteBehavior === behavior);
+            const $select = $("#relationshipSelect").empty();
+
+            if (filtered.length === 0) {
+                $select.append(`<option disabled>No relationships found.</option>`);
+                return;
+            }
+
+            filtered.forEach(rel => {
+                const label = `${rel.referencedEntity} (${rel.referencingAttribute})`;
+                const option = `<option value="${rel.schemaName}" data-entity="${rel.referencedEntity}" data-attribute="${rel.referencingAttribute}">${label}</option>`;
+                $select.append(option);
+            });
+        }
+
+        async function getPrimaryIdAttribute(entityLogicalName) {
+            const url = `${clientUrl}/api/data/v9.2/EntityDefinitions(LogicalName='${entityLogicalName}')?$select=PrimaryIdAttribute`;
+
+            try {
+                const response = await fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "OData-MaxVersion": "4.0",
+                        "OData-Version": "4.0",
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (!response.ok) throw new Error("Failed to retrieve primary ID attribute.");
+
+                const data = await response.json();
+                return data.PrimaryIdAttribute;
+
+            } catch (error) {
+                console.error("Error getting primary ID attribute:", error);
+                return `${entityLogicalName}id`; // Fallback
+            }
+        }
+
+        async function fetchRelationshipCount(entityName, entityKeyAttribute, referencingAttribute, relatedId) {
+            const fetchXml = `
+                        <fetch aggregate="true" datasource="bin">
+                          <entity name="${entityName}">
+                            <attribute name="${entityKeyAttribute}" alias="recordcount" aggregate="count" />
+                            <filter>
+                              <condition attribute="${referencingAttribute}" operator="eq" value="${relatedId}" />
+                            </filter>
+                          </entity>
+                        </fetch>`;
+
+            const encoded = encodeURIComponent(fetchXml);
+            const url = `${clientUrl}/api/data/v9.2/${entityName}s?fetchXml=${encoded}`;
+
+            try {
+                const response = await fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "OData-MaxVersion": "4.0",
+                        "OData-Version": "4.0",
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                const result = await response.json();
+                return result.value[0]?.recordcount || 0;
+
+            } catch (error) {
+                console.error("FetchXML failed", error);
+                return 0;
+            }
+        }
+
+        async function onRelationshipsSelected() {
+            $("#resultsTable tbody").empty();
+
+            const formContext = Xrm.Page || Xrm.Utility.getGlobalContext().formContext;
+            const lookup = formContext.getAttribute("deletedobject").getValue();
+            if (!lookup || lookup.length === 0) return;
+
+            const relatedId = lookup[0].id.replace(/[{}]/g, "").toLowerCase();
+
+            const $selectedOptions = $("#relationshipSelect option:selected");
+
+            for (let i = 0; i < $selectedOptions.length; i++) {
+                const option = $selectedOptions[i];
+                const entity = $(option).data("entity");
+                const referencingAttribute = $(option).data("attribute");
+                const entityKeyAttribute = await getPrimaryIdAttribute(entity);
+
+                const count = await fetchRelationshipCount(entity, entityKeyAttribute, referencingAttribute, relatedId);
+
+                $("#resultsTable tbody").append(`<tr><td>${entity}</td><td>${count}</td></tr>`);
+            }
+        }
+
+        $(document).ready(() => {
+            init();
+
+            $("#behaviorSelect").change(function () {
+                const selectedBehavior = $(this).val();
+                if (selectedBehavior) {
+                    filterRelationshipsByBehavior(selectedBehavior);
+                } else {
+                    $("#relationshipSelect").empty();
+                }
+                $("#resultsTable tbody").empty();
+            });
+
+            $("#relationshipSelect").change(function () {
+                onRelationshipsSelected();
+            });
+        });
+    </script>
+
+</body>
+</html>

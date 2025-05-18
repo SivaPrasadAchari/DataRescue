@@ -1,0 +1,29 @@
+1)you can use webresoucres html,javascript,css and jquery
+2)D365 CE I Have Entity in That I Have colum deletedobject its lookup coloum in that we will get EntityLogica Name
+3)Based on That Entiy Logical Name Retrive Entity Relationship Metadata.
+4)in html page show dropdown in that Delete Behaveor Based in the seltion show the relationships in multiselet box.
+
+
+relationshipSelect selected entity is activity then entityKeyAttribute is "activityid"
+
+and make the visuval left and right
+
+
+
+
+
+
+[{"@odata.etag":"W/\\"3702427\\"","customeraddressid":"e1e685d4-2a68-4d04-a498-9a834d3cd26f","modifiedon":"2025-05-16T18:45:55Z","_owninguser_value":"759770a4-b5db-ef11-a730-000d3a33bc46","freighttermscode":1,"objecttypecode":"contact","shippingmethodcode":1,"addresstypecode":1,"addressnumber":2,"_modifiedby_value":"759770a4-b5db-ef11-a730-000d3a33bc46","createdon":"2025-05-16T18:45:55Z","_owningbusinessunit_value":"e38f70a4-b5db-ef11-a730-000d3a33bc46","_parentid_value":"b18a7dff-8532-f011-8c4d-000d3a5bdba7","_createdby_value":"759770a4-b5db-ef11-a730-000d3a33bc46","_ownerid_value":"759770a4-b5db-ef11-a730-000d3a33bc46"},{"@odata.etag":"W/\\"3702428\\"","customeraddressid":"73871abb-544b-4f48-96c4-9e3174353923","modifiedon":"2025-05-16T18:45:55Z","_owninguser_value":"759770a4-b5db-ef11-a730-000d3a33bc46","objecttypecode":"contact","addressnumber":3,"_modifiedby_value":"759770a4-b5db-ef11-a730-000d3a33bc46","createdon":"2025-05-16T18:45:55Z","_owningbusinessunit_value":"e38f70a4-b5db-ef11-a730-000d3a33bc46","_parentid_value":"b18a7dff-8532-f011-8c4d-000d3a5bdba7","_createdby_value":"759770a4-b5db-ef11-a730-000d3a33bc46","_ownerid_value":"759770a4-b5db-ef11-a730-000d3a33bc46"},{"@odata.etag":"W/\\"3702429\\"","line2":"a","customeraddressid":"a0561456-fd73-4837-b883-c18f9c925c30","line1":"a","composite":"a\\r\\na\\r\\nusa","modifiedon":"2025-05-16T20:09:42Z","_owninguser_value":"759770a4-b5db-ef11-a730-000d3a33bc46","objecttypecode":"contact","addressnumber":1,"_modifiedby_value":"759770a4-b5db-ef11-a730-000d3a33bc46","createdon":"2025-05-16T18:45:55Z","country":"usa","_owningbusinessunit_value":"e38f70a4-b5db-ef11-a730-000d3a33bc46","_parentid_value":"b18a7dff-8532-f011-8c4d-000d3a5bdba7","_createdby_value":"759770a4-b5db-ef11-a730-000d3a33bc46","_ownerid_value":"759770a4-b5db-ef11-a730-000d3a33bc46"}]
+{"@odata.context":"https://org663d1b2a.crm.dynamics.com/api/data/v9.2/$metadata#activityparties(ispartydeleted,_activityid_value,activityid_activitypointer,participationtypemask,donotemail,donotfax,donotpostalmail,_ownerid_value,_partyid_value,partyid_account,activitypartyid,instancetypecode,donotphone,addressused,addressusedemailcolumnnumber,effort,exchangeentryid,externalid,externalidtype,partyid,scheduledend,scheduledstart,unresolvedpartyname,activityid_activitypointer(),partyid_account(),partyid())","value":[{"@odata.etag":"W/\\"3697880\\"","_ownerid_value":"759770a4-b5db-ef11-a730-000d3a33bc46","participationtypemask":8,"instancetypecode":0,"activitypartyid":"b2600ca3-5b80-4e4c-a4b0-1ef53b6a0486","donotfax":false,"donotpostalmail":false,"donotphone":false,"_partyid_value":"9d1691e5-8532-f011-8c4d-000d3a5bdba7","_activityid_value":"2b46ab2e-8632-f011-8c4d-000d3a5bdba7","donotemail":false,"ispartydeleted":false,"partyid":null},{"@odata.etag":"W/\\"3697886\\"","_ownerid_value":"759770a4-b5db-ef11-a730-000d3a33bc46","participationtypemask":9,"instancetypecode":0,"activitypartyid":"ae0947fc-9715-4d95-9d14-450a0d5bed86","_partyid_value":"759770a4-b5db-ef11-a730-000d3a33bc46","_activityid_value":"2b46ab2e-8632-f011-8c4d-000d3a5bdba7","ispartydeleted":false,"partyid":null}]}
+
+
+
+
+Account 1
+Task 2 
+Contact 2
+Parties 4
+
+Customer ACcount 2
+Customer ACcount 6
+
